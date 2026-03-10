@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Development & Emerging Technologies Reviewer</title>
+    <style>
+        :root {
+            --primary-color: #3880ff;
+            --primary-hover: #3171e0;
+            --secondary-color: #5260ff;
+            --success-color: #2dd36f;
+            --danger-color: #eb445a;
+            --bg-color: #f4f5f8;
+            --card-bg: #ffffff;
+            --text-main: #222428;
+            --text-muted: #92949c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* Tabs Navigation */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: var(--card-bg);
+            padding: 5px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary-color);
+            background: rgba(56, 128, 255, 0.1);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Content Sections */
+        .section {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- FLASHCARDS UI --- */
+        .flashcard-container {
+            perspective: 1000px;
+            width: 100%;
+            height: 300px;
+            margin-bottom: 25px;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            background-color: var(--card-bg);
+            text-align: center;
+        }
+
+        .card-front-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            position: absolute;
+            top: 20px;
+        }
+
+        .card-term {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .flashcard-back {
+            transform: rotateY(180deg);
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .card-definition {
+            font-size: 1.2rem;
+        }
+
+        .flashcard-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: rgba(56, 128, 255, 0.1);
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .control-btn:hover {
+            background-color: rgba(56, 128, 255, 0.2);
+        }
+
+        #card-counter {
+            font-weight: bold;
+            color: var(--text-muted);
+        }
+
+        /* --- QUIZ UI --- */
+        .quiz-question {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-main);
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+
+        .option-label:hover {
+            background-color: #f8f9fa;
+            border-color: #c8c9cc;
+        }
+
+        .option-label input[type="radio"] {
+            transform: scale(1.2);
+            accent-color: var(--primary-color);
+        }
+
+        /* Quiz Validation Styles */
+        .option-label.correct {
+            background-color: rgba(45, 211, 111, 0.1);
+            border-color: var(--success-color);
+            color: #1a7a3e;
+        }
+
+        .option-label.incorrect {
+            background-color: rgba(235, 68, 90, 0.1);
+            border-color: var(--danger-color);
+            color: #9c1f2e;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(56, 128, 255, 0.3);
+        }
+
+        .submit-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        #quiz-result {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .result-pass { background: rgba(45, 211, 111, 0.2); color: #1a7a3e; }
+        .result-fail { background: rgba(235, 68, 90, 0.2); color: #9c1f2e; }
+
+        @media (max-width: 600px) {
+            .flashcard-container { height: 350px; }
+            .card-term { font-size: 1.6rem; }
+            .card-definition { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>App Dev & Emerging Tech Reviewer</h1>
+        <div class="subtitle">Based strictly on your provided document</div>
+    </header>
+
+    <div class="tabs">
+        <button id="btn-flashcards" class="tab-btn active" onclick="switchTab('flashcards')">Flashcards</button>
+        <button id="btn-quiz" class="tab-btn" onclick="switchTab('quiz')">Quiz</button>
+    </div>
+
+    <!-- FLASHCARDS SECTION -->
+    <div id="flashcards" class="section active">
+        <div class="flashcard-container" onclick="flipCard()">
+            <div class="flashcard" id="flashcard">
+                <div class="flashcard-face">
+                    <div class="card-front-title">Tap to flip</div>
+                    <div class="card-term" id="card-term"></div>
+                </div>
+                <div class="flashcard-face flashcard-back">
+                    <div class="card-definition" id="card-definition"></div>
+                </div>
+            </div>
+        </div>
+        <div class="flashcard-controls">
+            <button class="control-btn" onclick="prevCard()">&#8592; Prev</button>
+            <span id="card-counter"></span>
+            <button class="control-btn" onclick="nextCard()">Next &#8594;</button>
+        </div>
+    </div>
+
+    <!-- QUIZ SECTION -->
+    <div id="quiz" class="section">
+        <div id="quiz-container">
+            <!-- Quiz questions generated via JS -->
+        </div>
+        <button class="submit-btn" onclick="submitQuiz()">Submit Answers</button>
+        <div id="quiz-result"></div>
+    </div>
+
+    <script>
+        // --- DATA SOURCED STRICTLY FROM THE DOCUMENT ---
+
+        const reviewData = [
+            { term: "Application (Software)", definition: "A computer software package that performs a specific function directly for an end user or another application." },
+            { term: "Native Mobile Apps", definition: "Apps written using the default language for the mobile platform (Objective C/Swift for iOS, Java for Android). Compiled and executed directly on the device." },
+            { term: "Mobile Web Apps", definition: "Applications accessed through a mobile browser. They require no installation and are cross-platform, but lack native API access." },
+            { term: "Hybrid Apps", definition: "A mobile app containing a web view (isolated browser instance) running a web app inside a native app wrapper. Has access to device features." },
+            { term: "Capacitor", definition: "The official Ionic runtime. A modern replacement for Cordova that provides access to native device features." },
+            { term: "Ionic CLI", definition: "A command-line tool used for project creation, building, and deploying apps." },
+            { term: "node_modules/ folder", definition: "Contains installed libraries and dependencies. Automatically created after npm install. Usually very large in size." },
+            { term: "src/ folder", definition: "Core source code of the application where most development happens. Contains pages, services, assets, and config files." },
+            { term: "src/app/app.module.ts", definition: "The root module of the Ionic application. Declares components, imports modules, and bootstraps the app." },
+            { term: "src/app/app.component.ts", definition: "The root component of the application. Controls the app layout and initializes app-level features." },
+            { term: "src/app/app-routing.module.ts", definition: "Manages navigation paths, defines routes for different pages, and enables lazy loading." },
+            { term: "assets/ folder", definition: "Stores static files such as Images, Icons, and Fonts." },
+            { term: "ionic serve -p 8102", definition: "Command to start the local development server and specifically set the port number to 8102." },
+            { term: "ionic generate", definition: "Command that uses the Angular CLI to automatically create framework features like pages, components, directives, and services." },
+            { term: "Ionic Starter Templates", definition: "Includes: tabs, sidemenu, blank, list, and my-first-app." },
+            { term: "ion-grid", definition: "A powerful mobile-first flexbox system for custom layouts. Based on a 12-column layout composed of a grid, rows, and columns." },
+            { term: "Ionic Components", definition: "High-level building blocks (like cards, lists, tabs, buttons) used to quickly construct the UI for your app." },
+            { term: "Button Component", definition: "Provides a clickable element (displaying text, icons, or both) styled with attributes. Example: <ion-button size=\"small\">Default</ion-button>" },
+            { term: "Ionic Input (<ion-input>)", definition: "A wrapper to the HTML input element with custom styling. Integrates with the mobile keyboard. Has label placements like fixed, stacked, and floating." },
+            { term: "Mobile App Distributors", definition: "Platforms where apps are uploaded: Google Play Store, Microsoft Store, Amazon App Store, F-Droid, Blackberry world, and App Store (iOS)." },
+            { term: "Button expand attr.", definition: "Specifies how wide the button should be. Values include 'block' (full-width, rounded corners) and 'full' (full-width, square corners)." },
+            { term: "Button fill attr.", definition: "Determines background/border color. Values: 'clear' (transparent), 'outline' (transparent with border), 'solid' (filled)." },
+            { term: "Radio Group", definition: "Contains radio buttons (<ion-radio>) where only one option can be checked at a time." },
+            { term: "Select (<ion-select>)", definition: "Form control to select option(s). Tapping it shows a dialog with a large list of <ion-select-option> elements." },
+            { term: "Action Sheet", definition: "A dialog displaying a set of options on top of the app's content, which must be manually dismissed. Highlights 'destructive' options on iOS." },
+            { term: "Modal", definition: "A dialog that appears on top of the app's content. Useful for selecting from a lot of options or filtering lists." },
+            { term: "Card (<ion-card>)", definition: "Standard UI piece serving as an entry point to more detailed information. Often made up of a header, title, subtitle, and content." },
+            { term: "Accordion", definition: "Provides collapsible sections (<ion-accordion>) to reduce vertical space and organize information." },
+            { term: "Loading Overlay", definition: "An overlay (<ion-loading>) used to indicate activity while blocking user interaction." },
+            { term: "Responsive Text Classes", definition: "Modifiers applied on specific screen sizes. Examples include -sm- (576px), -md- (768px), -lg- (992px), and -xl- (1200px)." },
+            { term: ".ion-text-wrap", definition: "Ionic CSS class that sets 'white-space: normal' to collapse whitespace and allow text to break into lines as necessary." },
+            { term: ".ion-text-capitalize", definition: "CSS class that forces the first letter of each word to be converted to uppercase." },
+            { term: ".ion-hide", definition: "CSS class that hides an element by setting 'display: none'." },
+            { term: ".ion-padding", definition: "Sets a default 16px padding on all sides of an element." },
+            { term: ".ion-margin-vertical", definition: "Sets a default 16px margin to the top and bottom of an element." },
+            { term: ".ion-justify-content-between", definition: "Flex property that evenly distributes items on the main axis with space between them." },
+            { term: ".ion-no-border", definition: "CSS utility class that removes the border from an element like ion-header or ion-footer." },
+            { term: "Mobile App Framework", definition: "A software platform providing tools, libraries, and APIs to speed up the building of mobile apps." },
+            { term: "Ionic Framework Origins", definition: "Released in 2013 and originally built on AngularJS. It's an open-source UI framework for cross-platform apps." },
+            { term: "Standalone Components", definition: "Used for new Ionic applications or smaller projects to reduce architectural complexity." },
+            { term: "NgModules", definition: "Used for maintaining legacy applications or managing large, complex, and deeply nested module structures." },
+            { term: "package.json", definition: "An important configuration file that stores project dependencies." },
+            { term: "ionic.config.json & tsconfig.json", definition: "ionic.config.json stores Ionic project settings, while tsconfig.json stores TypeScript configurations." },
+            { term: "<ion-header> & <ion-footer>", definition: "Layout components placed above and below <ion-content>. Typically contain <ion-toolbar> and <ion-title>." },
+            { term: "--ion-grid-padding", definition: "CSS variable used to set the padding on the grid container for all breakpoints." }
+        ];
+
+        const quizData = [
+            {
+                question: "Which of the following requires proficiency in the platform language, such as Objective C, Swift, or Java?",
+                options: ["Hybrid Apps", "Mobile Web Apps", "Native Mobile Apps", "Progressive Web Apps"],
+                answer: 2
+            },
+            {
+                question: "What is a main disadvantage of Mobile Web Apps mentioned in the document?",
+                options: ["They require a long installation process.", "They have no access to the native APIs or the platform.", "They are very difficult to update.", "They cannot run on desktop browsers."],
+                answer: 1
+            },
+            {
+                question: "Which type of app uses an 'isolated browser instance' wrapped inside a native app to access device features?",
+                options: ["Hybrid App", "Native App", "Mobile Web App", "Desktop App"],
+                answer: 0
+            },
+            {
+                question: "What is described as the 'official Ionic runtime' and a 'modern replacement for Cordova'?",
+                options: ["Ionic CLI", "Angular", "Capacitor", "Node.js"],
+                answer: 2
+            },
+            {
+                question: "Which folder in an Ionic project is automatically created after running 'npm install' and is usually very large?",
+                options: ["src/", "environments/", "assets/", "node_modules/"],
+                answer: 3
+            },
+            {
+                question: "Which file is the 'Root module' of the Ionic application that bootstraps the app?",
+                options: ["app.component.ts", "app.module.ts", "app-routing.module.ts", "environment.ts"],
+                answer: 1
+            },
+            {
+                question: "Where should you store static files such as images, icons, and fonts in an Ionic project?",
+                options: ["src/app/pages", "www/", "assets/", "environments/"],
+                answer: 2
+            },
+            {
+                question: "What does the command 'ionic serve -p 8102' do?",
+                options: ["Builds the app for production", "Generates a page named 8102", "Runs the app on port 8102", "Adds Capacitor to port 8102"],
+                answer: 2
+            },
+            {
+                question: "Which Ionic command uses the Angular CLI to automatically create features like pages and services?",
+                options: ["ionic start", "ionic generate", "ionic cap copy", "ionic build"],
+                answer: 1
+            },
+            {
+                question: "Which Ionic starter template provides a starting project with a navigation menu in the content area?",
+                options: ["blank", "tabs", "list", "sidemenu"],
+                answer: 3
+            },
+            {
+                question: "The 'ion-grid' flexbox system is based on how many columns?",
+                options: ["6 column layout", "10 column layout", "12 column layout", "16 column layout"],
+                answer: 2
+            },
+            {
+                question: "How do you define a small default button in Ionic based on the document's example?",
+                options: ["&lt;button class='small'&gt;Default&lt;/button&gt;", "&lt;ion-button size='small'&gt;Default&lt;/ion-button&gt;", "&lt;ion-btn small&gt;Default&lt;/ion-btn&gt;", "&lt;ion-button&gt;Small Default&lt;/ion-button&gt;"],
+                answer: 1
+            },
+            {
+                question: "Which component is described as a wrapper to the HTML input element that integrates with the mobile keyboard?",
+                options: ["&lt;ion-keyboard&gt;", "&lt;ion-form&gt;", "&lt;ion-item&gt;", "&lt;ion-input&gt;"],
+                answer: 3
+            },
+            {
+                question: "According to the document, an application can be self-contained or a...",
+                options: ["physical hardware component.", "web view instance.", "group of programs.", "cloud server."],
+                answer: 2
+            },
+            {
+                question: "Which of the following is NOT listed as a distributor platform for mobile apps in the document?",
+                options: ["Google Play Store", "F-Droid", "Blackberry world", "Steam Store"],
+                answer: 3
+            },
+            {
+                question: "Which attribute on &lt;ion-button&gt; changes the button to a full-width block element with square corners?",
+                options: ["expand=\"block\"", "shape=\"round\"", "expand=\"full\"", "size=\"large\""],
+                answer: 2
+            },
+            {
+                question: "What does the 'clear' fill attribute do to an &lt;ion-button&gt;?",
+                options: ["Removes all text from the button", "Gives it a transparent background resembling a flat button", "Gives it a filled solid background", "Gives it a transparent background with a visible border"],
+                answer: 1
+            },
+            {
+                question: "Which component displays a dialog with a set of options and must be manually dismissed, often featuring 'destructive' options on iOS?",
+                options: ["Card", "Action Sheet", "Accordion", "Modal"],
+                answer: 1
+            },
+            {
+                question: "What Ionic CSS class aligns text to the center of the line box?",
+                options: [".ion-text-center", ".ion-align-center", ".text-center", ".ion-justify-center"],
+                answer: 0
+            },
+            {
+                question: "If you want a class to apply text alignment only on screens wider than 768px, which prefix would you use?",
+                options: [".ion-text-sm-", ".ion-text-md-", ".ion-text-lg-", ".ion-text-xl-"],
+                answer: 1
+            },
+            {
+                question: "What is the default amount of padding applied by the '.ion-padding' class?",
+                options: ["8px", "12px", "16px", "24px"],
+                answer: 2
+            },
+            {
+                question: "Which CSS class hides an element by setting 'display: none'?",
+                options: [".ion-hidden", ".ion-invisible", ".ion-hide", ".hide-element"],
+                answer: 2
+            },
+            {
+                question: "How do you apply a 16px margin only to the left and right sides of an element?",
+                options: [".ion-margin-horizontal", ".ion-margin-vertical", ".ion-margin-start", ".ion-margin-sides"],
+                answer: 0
+            },
+            {
+                question: "Which class is used to pack flex items toward the start on the main axis?",
+                options: [".ion-align-items-start", ".ion-justify-content-start", ".ion-align-self-start", ".ion-flex-start"],
+                answer: 1
+            },
+            {
+                question: "What overlay component is used to indicate activity while blocking user interaction?",
+                options: ["Modal", "Action Sheet", "Alert", "Loading"],
+                answer: 3
+            },
+            {
+                question: "In Ionic CSS, what does '.ion-text-capitalize' do?",
+                options: ["Forces all characters to uppercase", "Forces all characters to lowercase", "Forces the first letter of each word to uppercase", "Capitalizes the first letter of the sentence only"],
+                answer: 2
+            },
+            {
+                question: "Which Ionic component is composed of a header, title, subtitle, and content to act as an entry point for more detailed information?",
+                options: ["List", "Card", "Accordion", "Menu"],
+                answer: 1
+            },
+            {
+                question: "What does the following code do? <br><code style='color: var(--primary-color); background: #eef; padding: 2px 5px; border-radius: 4px;'>&lt;ion-button shape=\"round\"&gt;Click Me&lt;/ion-button&gt;</code>",
+                options: ["Creates a full-width block element", "Creates a button with a rounded element/corners", "Creates a circular floating action button", "Creates a button with a transparent background"],
+                answer: 1
+            },
+            {
+                question: "In the context of an &lt;ion-button&gt;, what is the result of this code? <br><code style='color: var(--primary-color); background: #eef; padding: 2px 5px; border-radius: 4px;'>&lt;ion-icon slot=\"start\" name=\"star\"&gt;&lt;/ion-icon&gt;</code>",
+                options: ["Places a star icon on the left side of the button text", "Places a star icon on the right side of the button text", "Creates a button consisting only of a star icon", "Animates a star icon when the button is clicked"],
+                answer: 0
+            },
+            {
+                question: "What is the visual effect of the following button code? <br><code style='color: var(--primary-color); background: #eef; padding: 2px 5px; border-radius: 4px;'>&lt;ion-button fill=\"outline\"&gt;Submit&lt;/ion-button&gt;</code>",
+                options: ["It has a filled solid background", "It has no visible borders and a clear background", "It has a transparent background and a visible border", "It expands to fill the entire container width"],
+                answer: 2
+            },
+            {
+                question: "What does the following radio group configuration achieve? <br><code style='color: var(--primary-color); background: #eef; padding: 2px 5px; border-radius: 4px;'>&lt;ion-radio-group value=\"strawberries\"&gt;...&lt;/ion-radio-group&gt;</code>",
+                options: ["It allows multiple fruits to be selected simultaneously", "It disables the 'strawberries' option from being clicked", "It checks/pre-selects the radio button that has the value 'strawberries'", "It creates a dropdown menu specifically for strawberries"],
+                answer: 2
+            },
+            {
+                question: "What does the following code snippet do? <br><code style='color: var(--primary-color); background: #eef; padding: 2px 5px; border-radius: 4px;'>&lt;ion-toggle [checked]=\"true\"&gt;&lt;/ion-toggle&gt;</code>",
+                options: ["Creates a toggle that is disabled", "Creates a toggle that is turned on (ticked) by default", "Checks if the toggle component exists on the page", "Creates a checkbox instead of a toggle switch"],
+                answer: 1
+            },
+            {
+                question: "What happens when you apply this property to an input? <br><code style='color: var(--primary-color); background: #eef; padding: 2px 5px; border-radius: 4px;'>&lt;ion-input type=\"password\"&gt;&lt;/ion-input&gt;</code>",
+                options: ["It creates a standard text input", "It creates a numerical input only", "It creates an input that masks the entered characters", "It creates a hidden input field not visible to the user"],
+                answer: 2
+            },
+            {
+                question: "According to Lesson 1, which development approach is BEST for complex games and graphics-intensive apps that require full access to device features?",
+                options: ["Hybrid Apps", "Native Apps", "Mobile Websites", "Progressive Web Apps"],
+                answer: 1
+            },
+            {
+                question: "In what year was the Ionic Framework officially released, and what was it originally built on?",
+                options: ["2010 on React", "2013 on AngularJS", "2015 on Vue", "2018 on Capacitor"],
+                answer: 1
+            },
+            {
+                question: "When running the command 'ionic start myApp tabs', what does the 'tabs' argument specify?",
+                options: ["The project name", "The Ionic CLI version", "The project template", "The CSS framework"],
+                answer: 2
+            },
+            {
+                question: "When should a developer choose to use 'NgModules' over 'Standalone Components' according to the lesson?",
+                options: ["For new Ionic apps", "For smaller, simpler projects", "For maintaining legacy apps and complex nested structures", "To reduce architectural complexity"],
+                answer: 2
+            },
+            {
+                question: "Which file is specifically responsible for storing your project's TypeScript configuration?",
+                options: ["package.json", "ionic.config.json", "tsconfig.json", "angular.json"],
+                answer: 2
+            },
+            {
+                question: "What layout is created by the following code? <br><code style='color: var(--primary-color); background: #eef; padding: 2px 5px; border-radius: 4px;'>&lt;ion-app&gt;<br>&nbsp;&nbsp;&lt;ion-content&gt;Main&lt;/ion-content&gt;<br>&nbsp;&nbsp;&lt;ion-footer&gt;&lt;ion-toolbar&gt;&lt;/ion-toolbar&gt;&lt;/ion-footer&gt;<br>&lt;/ion-app&gt;</code>",
+                options: ["A page with a top header and middle content", "A page with middle content and a bottom toolbar", "A split-pane layout", "A modal dialog layout"],
+                answer: 1
+            },
+            {
+                question: "What does the following CSS rule accomplish? <br><code style='color: var(--primary-color); background: #eef; padding: 2px 5px; border-radius: 4px;'>ion-grid { --ion-grid-padding: 20px; }</code>",
+                options: ["Sets a 20px margin outside the grid", "Sets 20px padding inside individual columns", "Sets 20px padding on the main grid container across all breakpoints", "Changes the grid to a 20-column layout"],
+                answer: 2
+            }
+        ];
+
+        // --- TAB LOGIC ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            document.getElementById('btn-' + tabId).classList.add('active');
+        }
+
+        // --- FLASHCARD LOGIC ---
+        let currentCardIndex = 0;
+        const termEl = document.getElementById('card-term');
+        const defEl = document.getElementById('card-definition');
+        const flashcardEl = document.getElementById('flashcard');
+        const counterEl = document.getElementById('card-counter');
+
+        function loadCard() {
+            flashcardEl.classList.remove('is-flipped');
+            // Wait for flip animation to hide back before changing text
+            setTimeout(() => {
+                termEl.textContent = reviewData[currentCardIndex].term;
+                defEl.textContent = reviewData[currentCardIndex].definition;
+                counterEl.textContent = `Card ${currentCardIndex + 1} of ${reviewData.length}`;
+            }, 150);
+        }
+
+        function flipCard() {
+            flashcardEl.classList.toggle('is-flipped');
+        }
+
+        function nextCard() {
+            currentCardIndex = (currentCardIndex + 1) % reviewData.length;
+            loadCard();
+        }
+
+        function prevCard() {
+            currentCardIndex = (currentCardIndex - 1 + reviewData.length) % reviewData.length;
+            loadCard();
+        }
+
+        // --- QUIZ LOGIC ---
+        const quizContainer = document.getElementById('quiz-container');
+
+        function loadQuiz() {
+            let html = '';
+            quizData.forEach((q, index) => {
+                html += `
+                <div class="quiz-question" id="q-block-${index}">
+                    <div class="question-text">${index + 1}. ${q.question}</div>
+                    <div class="options-grid">`;
+                
+                q.options.forEach((opt, optIndex) => {
+                    html += `
+                        <label class="option-label" id="label-q${index}-o${optIndex}">
+                            <input type="radio" name="q${index}" value="${optIndex}">
+                            ${opt}
+                        </label>`;
+                });
+                
+                html += `</div></div>`;
+            });
+            quizContainer.innerHTML = html;
+        }
+
+        function submitQuiz() {
+            let score = 0;
+            const total = quizData.length;
+
+            quizData.forEach((q, index) => {
+                const selectedInput = document.querySelector(`input[name="q${index}"]:checked`);
+                
+                // Reset styling for this question's labels
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(input => {
+                    input.parentElement.classList.remove('correct', 'incorrect');
+                });
+
+                if (selectedInput) {
+                    const selectedValue = parseInt(selectedInput.value);
+                    const labelSelected = document.getElementById(`label-q${index}-o${selectedValue}`);
+                    const labelCorrect = document.getElementById(`label-q${index}-o${q.answer}`);
+
+                    if (selectedValue === q.answer) {
+                        score++;
+                        labelSelected.classList.add('correct');
+                    } else {
+                        labelSelected.classList.add('incorrect');
+                        labelCorrect.classList.add('correct'); // Show correct answer
+                    }
+                } else {
+                    // If skipped, just highlight the correct answer
+                    const labelCorrect = document.getElementById(`label-q${index}-o${q.answer}`);
+                    labelCorrect.classList.add('correct');
+                }
+            });
+            
+            const resultDiv = document.getElementById('quiz-result');
+            resultDiv.style.display = 'block';
+            
+            // Calculate percentage
+            const percentage = Math.round((score / total) * 100);
+            
+            if (percentage >= 70) {
+                resultDiv.className = 'result-pass';
+                resultDiv.textContent = `Excellent! You scored ${score}/${total} (${percentage}%)`;
+            } else {
+                resultDiv.className = 'result-fail';
+                resultDiv.textContent = `Keep studying! You scored ${score}/${total} (${percentage}%)`;
+            }
+
+            // Scroll to bottom to see score
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize App
+        loadCard();
+        loadQuiz();
+    </script>
+</body>
+</html>
